@@ -1,0 +1,129 @@
+using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
+
+public class PlayerMovement : MonoBehaviour
+{
+    //movement variables
+    public float MaxSpeed;
+
+    //For animations later on
+    public Animator myAnim;
+
+    //from Jacob
+    public float moveSpeed;
+
+    private Rigidbody2D myRigidBody;
+
+    // for healthBar and reloading the level
+
+    public float waitToReload;
+    private bool reloading;
+    public static int health = 100;
+    public Slider HealthBar;
+    public GameObject theEnemy;
+    // for shooting
+
+
+    public Transform slimeballlocation;
+    public GameObject slimeball;
+    float fireRate = 0.5f;
+    float nextFire = 1f;
+    bool facingRight;
+
+
+
+    // Use this for initialization
+    void Start()
+    {
+        myRigidBody = GetComponent<Rigidbody2D>();
+    myAnim = GetComponent<Animator>();
+        facingRight = true;
+    }
+
+    // Update is called once per frame
+   void Update()
+       {
+    if (Input.GetAxisRaw("Horizontal") < 0.5f || Input.GetAxisRaw("Horizontal") > -0.5f)
+     {
+         transform.Translate(new Vector3(Input.GetAxisRaw("Horizontal") * moveSpeed * Time.deltaTime, 0f, 0f));
+      
+         if (Input.GetAxisRaw("Vertical") < 0.5f || Input.GetAxisRaw("Vertical") > -0.5f)
+        {
+              transform.Translate(new Vector3(0f, Input.GetAxisRaw("Vertical") * moveSpeed * Time.deltaTime, 0f));
+
+        }
+   }
+        if (reloading)
+        {
+            waitToReload -= Time.deltaTime;
+            if (waitToReload < 0)
+            {
+                Application.LoadLevel(Application.loadedLevel);
+            }
+        }
+
+        //player shooting
+        if (Input.GetAxisRaw("Fire1") > 0) fireSlimeball();
+    }
+
+
+    void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.gameObject.tag == "theEnemy")
+        {
+            health = health - 20;
+            HealthBar.value = health;
+        }
+        if (HealthBar.value < 1)
+        {
+            reloading = true;
+        }
+        
+
+    }
+
+
+    //updates at a specific time
+    void fixedUpdate()
+    {
+        float move = Input.GetAxis("Horizontal");
+        myAnim.SetFloat("speed", Mathf.Abs(move));
+        myRigidBody.velocity = new Vector2(move * MaxSpeed, myRigidBody.velocity.y);
+        if (move > 0 && !facingRight)
+        {
+            flip();
+
+        }else if (move<0&& facingRight)
+        {
+            flip();
+        }
+                 
+
+
+    }
+
+
+    void flip()
+    {
+        facingRight = !facingRight;
+        Vector3 theScale = transform.localScale;
+        theScale.x *= -1;
+        transform.localScale = theScale;
+    }
+
+
+    //player shooting
+    
+    void fireSlimeball()
+    {
+        if (Time.time>nextFire)
+        {
+            nextFire= Time.time + fireRate;
+            if (facingRight)
+            {
+                //Instantiate(slimeball, slimeballlocation.position, Quaternion
+            }
+        }
+    }
+}
